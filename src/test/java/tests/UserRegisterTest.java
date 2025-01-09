@@ -92,4 +92,25 @@ public class UserRegisterTest extends BaseTestCase {
         Assertions.assertResponseCodeEquals(responseCreateAuth, 400);
         Assertions.assertResponseTextEquals(responseCreateAuth, "The value of 'username' field is too short");
     }
+
+    @Test
+    public void testCreateUserWithLongName(){
+        String firstName = "The art of swimming involves a delicate balance of strength, technique, and endurance. With consistent practice, attention to detail, and a focus on improving every stroke, swimmers can achieve remarkable results in the water, enhancing speed, efficiency, and overall performance.";
+
+        Map<String, String> userData = new HashMap<>();
+        userData.put("firstName", firstName);
+        userData = DataGenerator.getRegistrationData(userData);
+
+        Response responseCreateAuth = RestAssured
+                .given()
+                .body(userData)
+                .post("https://playground.learnqa.ru/api/user/")
+                .andReturn();
+
+        System.out.println(responseCreateAuth.asString());
+        System.out.println(responseCreateAuth.statusCode());
+
+        Assertions.assertResponseCodeEquals(responseCreateAuth, 400);
+        Assertions.assertResponseTextEquals(responseCreateAuth, "The value of 'firstName' field is too long");
+    }
 }
