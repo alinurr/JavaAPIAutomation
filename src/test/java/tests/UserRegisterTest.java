@@ -113,4 +113,23 @@ public class UserRegisterTest extends BaseTestCase {
         Assertions.assertResponseCodeEquals(responseCreateAuth, 400);
         Assertions.assertResponseTextEquals(responseCreateAuth, "The value of 'firstName' field is too long");
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"email", "password", "username", "firstName", "lastName"})
+    public void testCreateUserWithoutOneParameter(String missingField){
+        Map<String, String> userData = DataGenerator.getRegistrationData();
+        userData.remove(missingField);
+
+        Response responseCreateAuth = RestAssured
+                .given()
+                .body(userData)
+                .post("https://playground.learnqa.ru/api/user/")
+                .andReturn();
+
+        System.out.println(responseCreateAuth.asString());
+        System.out.println(responseCreateAuth.statusCode());
+
+        Assertions.assertResponseCodeEquals(responseCreateAuth, 400);
+        Assertions.assertResponseTextEquals(responseCreateAuth, "The following required params are missed: " + missingField);
+    }
 }
