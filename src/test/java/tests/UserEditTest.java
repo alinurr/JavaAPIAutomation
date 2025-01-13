@@ -60,4 +60,19 @@ public class UserEditTest extends BaseTestCase {
 
         Assertions.assertJsonByName(responseUserData, "firstName", newName);
     }
+
+    @Test
+    public void testEditUserWhenNotAuth(){
+        Map<String, String> editData = new HashMap<>();
+        editData.put("username", "serererj");
+
+        Response responseEditUser = RestAssured
+                .given()
+                .body(editData)
+                .put("https://playground.learnqa.ru/api/user/2")
+                .andReturn();
+
+        Assertions.assertResponseCodeEquals(responseEditUser, 400);
+        Assertions.assertJsonByName(responseEditUser, "error", "Auth token not supplied");
+    }
 }
