@@ -75,4 +75,29 @@ public class UserEditTest extends BaseTestCase {
         Assertions.assertResponseCodeEquals(responseEditUser, 400);
         Assertions.assertJsonByName(responseEditUser, "error", "Auth token not supplied");
     }
+
+    @Test
+    public void testEditUserInfoWithOtherUser(){
+        Map<String, String> authData = new HashMap<>();
+        authData.put("email", "vinkotov@example.com");
+        authData.put("password", "1234");
+
+        Response responseGetAuth = RestAssured
+                .given()
+                .body(authData)
+                .post("https://playground.learnqa.ru/api/user/login")
+                .andReturn();
+
+        String header = this.getHeader(responseGetAuth, "x-csrf-token");
+        String cookie = this.getCookie(responseGetAuth, "auth_sid");
+
+        Response responseUserData = RestAssured
+                .given()
+                .header("x-csrf-token", header)
+                .cookie("auth_sid", cookie)
+                .get("https://playground.learnqa.ru/api/user/3")
+                .andReturn();
+
+
+    }
 }
