@@ -77,10 +77,20 @@ public class UserEditTest extends BaseTestCase {
     }
 
     @Test
-    public void testEditUserInfoWithOtherUser(){
+    public void testEditUserInfoWithOtherUserAuth(){
+        //GENERATE USER
+        Map<String, String> userData = DataGenerator.getRegistrationData();
+
+        JsonPath responseCreateAuth = RestAssured
+                .given()
+                .body(userData)
+                .post("https://playground.learnqa.ru/api/user")
+                .jsonPath();
+
+        //LOGIN
         Map<String, String> authData = new HashMap<>();
-        authData.put("email", "vinkotov@example.com");
-        authData.put("password", "1234");
+        authData.put("email", userData.get("email"));
+        authData.put("password", userData.get("password"));
 
         Response responseGetAuth = RestAssured
                 .given()
@@ -88,16 +98,22 @@ public class UserEditTest extends BaseTestCase {
                 .post("https://playground.learnqa.ru/api/user/login")
                 .andReturn();
 
-        String header = this.getHeader(responseGetAuth, "x-csrf-token");
-        String cookie = this.getCookie(responseGetAuth, "auth_sid");
+        //EDIT
+        String newName = "Changes name";
+        Map<String, String> editData = new HashMap<>();
+        editData.put("firstName", newName);
 
-        Response responseUserData = RestAssured
+        Response responseEditUser = RestAssured
                 .given()
-                .header("x-csrf-token", header)
-                .cookie("auth_sid", cookie)
-                .get("https://playground.learnqa.ru/api/user/3")
+                .header("x-csrf-token", this.getHeader(responseGetAuth, "x-csrf-token"))
+                .cookie("auth_sid", this.getCookie(responseGetAuth, "auth_sid"))
+                .body(editData)
+                .put("https://playground.learnqa.ru/api/user/114815")
                 .andReturn();
 
+        System.out.println(responseEditUser.asString());
+
+        Assertions.assertJsonByName(responseEditUser, "error", "This user can only edit their own data.");
 
     }
 }
