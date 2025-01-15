@@ -114,6 +114,35 @@ public class UserEditTest extends BaseTestCase {
         System.out.println(responseEditUser.asString());
 
         Assertions.assertJsonByName(responseEditUser, "error", "This user can only edit their own data.");
+    }
 
+    @Test
+    public void testEditUserEmailWithoutAt(){
+        //LOGIN
+        Map<String, String> authData = new HashMap<>();
+        authData.put("email", "alinurr@example.com");
+        authData.put("password", "dsfsdf234");
+
+        Response responseGetAuth = RestAssured
+                .given()
+                .body(authData)
+                .post("https://playground.learnqa.ru/api/user/login")
+                .andReturn();
+
+        //EDIT
+        Map<String, String> editData = new HashMap<>();
+        editData.put("email", "alinurrexample.com");
+
+        Response responseEditUser = RestAssured
+                .given()
+                .header("x-csrf-token", this.getHeader(responseGetAuth, "x-csrf-token"))
+                .cookie("auth_sid", this.getCookie(responseGetAuth, "auth_sid"))
+                .body(editData)
+                .put("https://playground.learnqa.ru/api/user/114815")
+                .andReturn();
+
+        System.out.println(responseEditUser.asString());
+
+        Assertions.assertJsonByName(responseEditUser, "error", "Invalid email format");
     }
 }
